@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        input[type="text"], textarea,select {
+
+    background-color : rgb(63 63 67);
+    color:white;
+    outline: none;
+
+
+}
+        div{
+            margin-top:1rem;
+        }
+
+
+    </style>
+</head>
+<body style="background-color:rgb(28, 28, 30);color:white"></body>
+    <form id="form" action="">  
+        <div>
+            <label for="city">城市</label>
+            <input type="text" id="city" name="city">    
+        </div>
+        <div>
+            <label for="temp">温度单位</label>
+            <select id="temp" name="temp">
+                <option value="cel">摄氏度</option>
+                <option value="far">华氏度</option>
+            </select>    
+        </div>
+        <div>
+            <label for="freq">更新频率</label>
+            <select id="freq" name="freq">
+                <option value="push">按下按键</option>
+                <option value="ten">每十分钟</option>
+                <option value="thirty">每半小时</option>
+                <option value="hour">每小时</option>
+            </select>    
+        </div>
+        <div>
+            <label for="cityDisplay">显示城市名称</label>
+            <select id="cityDisplay" name="cityDisplay">
+                <option value="hide">隐藏</option>
+                <option value="topLeft">左上角</option>
+                <option value="topRight">右上角</option>
+                <option value="bottomRight">右下角</option>
+                <option value="bottomLeft">左下角</option>
+            </select>
+    
+        </div>
+        <div>
+            <label for="round">是否取整</label>
+            <select id="round" name="round">
+                <option value="yes">是</option>
+                <option value="no">否</option>
+            </select>
+    
+        </div>
+      </form>
+</body>
+<script>
+    const form = document.querySelector("#form")
+const ws = new WebSocket("ws://localhost:3912");
+
+let initialConfig = null;
+
+// Listen for messages
+ws.addEventListener("message", function(ev){
+    console.log(ev)
+    const msg = JSON.parse(ev.data)
+    console.log(`[channel]${msg}`)
+    initialConfig = msg.param
+    setConfig()
+});
+  
+
+function setConfig(){
+    //初始化，使用上位机的持久化数据
+    if(initialConfig && Object.keys(initialConfig).length){
+        document.getElementById("city").value = initialConfig.city 
+        document.getElementById("temp").value = initialConfig.temp 
+        document.getElementById("freq").value = initialConfig.freq 
+        document.getElementById("cityDisplay").value = initialConfig.cityDisplay
+        document.getElementById("round").value = initialConfig.round
+    }
+}
+
+document.querySelector("#form").addEventListener("change",(e)=>{
+    //form data 
+    const formData = new FormData(form)
+    for (const pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+    //send to main 
+    ws.send(JSON.stringify(Object.fromEntries(formData)));
+
+})
+</script>
+</html>
