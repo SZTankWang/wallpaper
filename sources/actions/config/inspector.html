@@ -20,7 +20,7 @@
 
     </style>
 </head>
-<body style="background-color:rgb(28, 28, 30);color:white"></body>
+<body style="background-color:rgb(40,40,40);color:white"></body>
     <form id="form" action="">  
         <div>
             <label for="city">城市</label>
@@ -68,13 +68,15 @@
 const ws = new WebSocket("ws://localhost:3912");
 
 let initialConfig = null;
-
+let key = null;
 // Listen for messages
 ws.addEventListener("message", function(ev){
     console.log(ev)
     const msg = JSON.parse(ev.data)
     console.log(`[channel]${msg}`)
     initialConfig = msg.param
+    //记录该页面的key
+    key = msg.key
     setConfig()
 });
   
@@ -96,6 +98,7 @@ document.querySelector("#form").addEventListener("change",(e)=>{
     for (const pair of formData.entries()) {
         console.log(pair[0], pair[1]);
       }
+      formData.key = key 
     //send to main 
     ws.send(JSON.stringify(Object.fromEntries(formData)));
 
