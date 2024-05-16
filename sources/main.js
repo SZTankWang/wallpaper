@@ -142,13 +142,16 @@ ws.addEventListener("message", async (event) => {
                 break
 
             case "setactive":
-                add(data.key,actionid)
-                //如果之前有执行结果，则要发送这个执行结果
-                const prev_param = actionParamMapping.get(actionid)
-                if(prev_param!==undefined){
-                    const image = await run(prev_param,actionid)
-                    await updateIcon(image,data.key)
+                if(data.active){
+                    add(data.key,actionid)
+                    //如果之前有执行结果，则要发送这个执行结果
+                    const prev_param = actionParamMapping.get(actionid)
+                    if(prev_param!==undefined){
+                        const image = await run(prev_param,actionid)
+                        await updateIcon(image,data.key)
+                    }
                 }
+
                 resp = {
                     "code":0,
                     "cmd":"setactive",
@@ -222,8 +225,11 @@ async function run(param,actionid) {
     const resp = await fetch(url)
     const json = await resp.json()
     console.log("result", json)
-    const image = await drawImage(json?.lives[0],param)
-    return image
+    if(json?.lives?.length > 0){
+        const image = await drawImage(json?.lives[0],param)
+        return image
+    }
+
 }
 
 function drawImageOnContext(imageUrl,context){
@@ -339,6 +345,7 @@ async function updateParam(param) {
     //写入map
     actionParamMapping.set(param.actionid,param)
     //更新一次
+    
     const image = await run(param,param.actionid)
     await updateIcon(image,param.key)
     const msg = {
