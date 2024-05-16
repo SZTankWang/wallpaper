@@ -41,6 +41,7 @@ let currKey = null; //记录当前正在通信的配置页
 let currParam = null; //用来给当前配置页发送的配置
 let keyWsMapping = new Map();//key -> ws 
 let keyActionMapping = new Map(); //KEY -> ACTIONID
+let actionParamMapping = new Map() ; //actionid -> param 
 let keyParamMapping = new Map();
 let latestWS = null; //最近建立连接的websocket
 //绑定的按键
@@ -135,7 +136,7 @@ ws.addEventListener("message", async (event) => {
                     "param": {}
                 }
                 ws.send(JSON.stringify(resp))
-                const image = await run(data.param)
+                const image = await run(data.param,actionid)
                 await updateIcon(image,data.key)
                 //发送到上位机
                 break
@@ -143,9 +144,9 @@ ws.addEventListener("message", async (event) => {
             case "setactive":
                 add(data.key,actionid)
                 //如果之前有执行结果，则要发送这个执行结果
-                const prev_param = keyParamMapping.get(data.key)
+                const prev_param = actionParamMapping.get(actionid)
                 if(prev_param!==undefined){
-                    const image = await run(prev_param,data.key)
+                    const image = await run(prev_param,actionid)
                     await updateIcon(image,data.key)
                 }
                 resp = {
@@ -162,7 +163,7 @@ ws.addEventListener("message", async (event) => {
                 //设置从上位机发来的持久化参数
                 const param = data.param
 
-                paramfromapp(param, key)
+                paramfromapp(param, actionid,key)
                 //回复
                 resp = {
                     "cmd": "paramfromapp",
@@ -211,12 +212,12 @@ ws.addEventListener("message", async (event) => {
 });
 
 //执行插件功能
-//param: 本次的配置，key:对应的键位
-async function run(param,board_key) {
+//param: 本次的配置，actionid:对应的实例
+async function run(param,actionid) {
     //make request 
     console.log("invoking run")
     //记录本次的param，用于下次setactive使用
-    keyParamMapping.set(board_key,param)
+    keyParamMapping.set(actionid,param)
     const url = `https://restapi.amap.com/v3/weather/weatherInfo?key=${key}&city=${param.city}`
     const resp = await fetch(url)
     const json = await resp.json()
@@ -272,7 +273,7 @@ function drawImage(data, param) {
         context.fillText('风力',5,220)
         context.fillText(data.windpower,150,220)
         const image = offScreenCanvas.toDataURL("image/png")
-        console.log(image)
+        // console.log(image)
         return image; //return canvas element
     
     })
@@ -292,7 +293,7 @@ function add(key,actionid) {
     keyActionMapping.set(currKey,actionid)
 }
 //传递参数给插件
-function paramfromapp(param, key) {
+function paramfromapp(param, actionid,key) {
     if (Object.entries(param).length == 0) {
         currParam = {}
 
@@ -302,15 +303,18 @@ function paramfromapp(param, key) {
         currParam = param
     }
     //写入map中
-    keyParamMapping.set(key,param)
+    actionParamMapping.set(actionid,param)
     //将对应的key和配置发送给配置页面
     let initialMsg = {
         "cmd": "paramfromplugin",
         "uuid": "com.ulanzi.ulanzideck.weather", //功能uuid
-        "key": key, //上位机按键key
-        "param": currParam //持久化的参数
+        "param": currParam, //持久化的参数,
+        "actionid":actionid,
+        "key":key
     }
+
     if(keyWsMapping.get(key)){
+        console.log("发送参数到页面")
         keyWsMapping.get(key).send(JSON.stringify(initialMsg))
     }
 
@@ -331,18 +335,18 @@ function clear() {
 // 插件->上位机
 //插件更新参数
 async function updateParam(param) {
-    console.log("[updateParam] 键是", currKey)
+    console.log("[updateParam] 键是", param.key)
     //写入map
-    keyParamMapping.set(currKey,param)
+    actionParamMapping.set(param.actionid,param)
     //更新一次
-    const image = await run(param)
-    await updateIcon(image,currKey)
+    const image = await run(param,param.actionid)
+    await updateIcon(image,param.key)
     const msg = {
         "cmd": "paramfromplugin",
         "uuid": actionID, //功能uuid
-        "key": currKey, //上位机按键key
+        "key": param.key, //上位机按键key
         "param": param,
-        "actionid":keyActionMapping.get(currKey)
+        "actionid":keyActionMapping.get(param.key)
     }
 
     ws.send(JSON.stringify(msg))

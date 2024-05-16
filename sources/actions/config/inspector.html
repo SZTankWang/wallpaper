@@ -69,6 +69,7 @@ const ws = new WebSocket("ws://localhost:3912");
 
 let initialConfig = null;
 let key = null;
+let actionid = null;
 // Listen for messages
 ws.addEventListener("message", function(ev){
     console.log(ev)
@@ -77,6 +78,8 @@ ws.addEventListener("message", function(ev){
     initialConfig = msg.param
     //记录该页面的key
     key = msg.key
+    //记录该页面的actionid
+    actionid = msg.actionid
     setConfig()
 });
   
@@ -98,7 +101,8 @@ document.querySelector("#form").addEventListener("change",(e)=>{
     for (const pair of formData.entries()) {
         console.log(pair[0], pair[1]);
       }
-      formData.key = key 
+      formData.append("key",key) 
+      formData.append("actionid",actionid)
     //send to main 
     ws.send(JSON.stringify(Object.fromEntries(formData)));
 
