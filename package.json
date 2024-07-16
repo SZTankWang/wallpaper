@@ -1,8 +1,9 @@
 {
   "type": "module",
   "dependencies": {
+    "canvas": "^2.11.2",
     "node-pre-gyp": "^0.17.0",
-    "ws": "^8.17.0",
-    "canvas": "^2.11.2"
+    "wallpaper": "^7.2.1",
+    "ws": "^8.17.0"
   }
 }

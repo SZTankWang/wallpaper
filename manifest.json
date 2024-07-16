@@ -1,29 +1,29 @@
 {
     "Author": "Zhenming Wang",
-    "Name": "Weather",
-    "Description": "Weather Plugin",
-    "Icon": "resources/weather.png",
+    "Name": "Wallpaper",
+    "Description": "Wallpaper Plugin",
+    "Icon": "resources/wallpaper.png",
     "Version": "0.0.1",
     "Category": "Custom",
-    "CategoryIcon": "resources/weather.png",
+    "CategoryIcon": "resources/wallpaper.png",
     "CodePath": "sources/main.js",
     "Type": "JavaScript",
     "PrivateAPI": true,
-    "UUID": "com.ulanzi.ulanzideck.weather",
+    "UUID": "com.ulanzi.ulanzideck.wallpaper",
     "Actions":[
         {
-            "Name": "ConfigWeather",
-            "Icon": "resources/actions/config/icon.png",
+            "Name": "Config",
+            "Icon": "resources/wallpaper.png",
             "PropertyInspectorPath":"sources/actions/config/inspector.html",
             "state": 0,
             "States": [
             {
                 "Name": "Default",
-                "Image":"resources/weather.png"
+                "Image":"resources/wallpaper.png"
             }
             ],
-            "Tooltip": "Config Weather Plugin",
-            "UUID": "com.ulanzi.ulanzideck.weather.config"
+            "Tooltip": "Config Wallpaper Plugin",
+            "UUID": "com.ulanzi.ulanzideck.wallpaper.config"
         }
     ],
     "OS": [{ "Platform": "windows", "MinimumVersion": "10" }],
