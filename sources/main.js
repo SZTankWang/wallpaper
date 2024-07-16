@@ -363,8 +363,12 @@ async function drawIcon(filePath) {
     let w = 256, h = 256
     let offScreenCanvas = createCanvas(w, h);
     let context = offScreenCanvas.getContext("2d");
+    const bgImgPath = `${__dirname}/screen.png`;
+    console.log("-------背景路径------",bgImgPath)
 
-    const bgImage = await loadImage(__dirname + "/screen.png")
+
+    const bgImage = await loadImage(bgImgPath)
+
 
     context.drawImage(bgImage, 0, 0);
     let wallPaper
